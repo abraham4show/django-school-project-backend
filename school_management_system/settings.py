@@ -122,16 +122,22 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # CORS configuration
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://localhost:8080",
-]
-# In production, read from environment variable
-if not DEBUG:
-    CORS_ALLOWED_ORIGINS += os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+if DEBUG:
+    # Development: allow localhost origins
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "http://localhost:8080",
+    ]
+else:
+    # Production: read from environment variable
+    cors_env = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+    if cors_env:
+        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_env.split(',') if origin.strip()]
+    else:
+        CORS_ALLOWED_ORIGINS = []
 
 # For development only – you can also use CORS_ALLOW_ALL_ORIGINS = True if needed,
 # but be careful with that in production.
