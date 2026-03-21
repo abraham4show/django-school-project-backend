@@ -86,7 +86,8 @@ DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
         conn_max_age=600,
-        ssl_require=not DEBUG
+        ssl_require=not DEBUG,
+        conn_health_checks=True,  # <-- add this line
     )
 }
 
@@ -129,8 +130,8 @@ else:
         CORS_ALLOWED_ORIGINS = []
 
 # 🔍 Debug print – check Render logs for this line
-print("🔧 DEBUG =", DEBUG)
-print("🔧 CORS_ALLOWED_ORIGINS =", CORS_ALLOWED_ORIGINS)
+# print("🔧 DEBUG =", DEBUG)
+# print("🔧 CORS_ALLOWED_ORIGINS =", CORS_ALLOWED_ORIGINS)
 
 # Django REST Framework configuration
 REST_FRAMEWORK = {
