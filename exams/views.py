@@ -67,12 +67,12 @@ class ExamAttemptViewSet(viewsets.ModelViewSet):
     serializer_class = ExamAttemptSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        user = self.request.user
-        if hasattr(user, 'profile') and user.profile.role == 'student':
-            return ExamAttempt.objects.filter(student=user.student_profile)
-        return ExamAttempt.objects.none()
-
+def get_queryset(self):
+    user = self.request.user
+    if user.is_authenticated and hasattr(user, 'profile') and user.profile.role == 'student':
+        if hasattr(user, 'student_profile'):
+         return ExamAttempt.objects.filter(student=user.student_profile)
+    return ExamAttempt.objects.none()
     def list(self, request, *args, **kwargs):
         try:
             queryset = self.get_queryset()
