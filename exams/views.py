@@ -62,7 +62,6 @@ class ExamViewSet(viewsets.ModelViewSet):
         serializer = ExamAttemptSerializer(attempt)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
 class ExamAttemptViewSet(viewsets.ModelViewSet):
     queryset = ExamAttempt.objects.none()
     serializer_class = ExamAttemptSerializer
@@ -75,9 +74,15 @@ class ExamAttemptViewSet(viewsets.ModelViewSet):
         return ExamAttempt.objects.none()
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            print("🔥 ERROR in ExamAttemptViewSet.list:")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
 
     @action(detail=False, methods=['post'], permission_classes=[IsStudent])
     def start(self, request):
@@ -117,7 +122,6 @@ class ExamAttemptViewSet(viewsets.ModelViewSet):
                 is_correct = question.correct_answer == ans.get('answer_text', '')
                 if is_correct:
                     marks = question.points
-            # For essay questions, marks remain 0 (teacher grades later)
             Answer.objects.create(
                 attempt=attempt,
                 question=question,
@@ -129,7 +133,7 @@ class ExamAttemptViewSet(viewsets.ModelViewSet):
             total_score += marks
 
         attempt.score = total_score
-        attempt.passed = total_score >= (attempt.exam.total_marks * 0.5)  # Adjust threshold as needed
+        attempt.passed = total_score >= (attempt.exam.total_marks * 0.5)
         attempt.submitted_at = timezone.now()
         attempt.save()
 
